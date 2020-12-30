@@ -4,7 +4,8 @@
 import os, time, sys, pickle
 import argparse
 from net_gen_base import net_gen_base
-from ..ssd import build_ssd
+sys.path.append("..")
+from ssd import build_ssd
 import torch
 import onnx
 
@@ -17,6 +18,7 @@ class ssd_gen(net_gen_base):
         net = build_ssd('test', self.imgsz, self.num_classes)            # initialize SSD
         net.load_state_dict(torch.load(pt_weight_file))
         net.eval()
+        return net
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -24,9 +26,9 @@ if __name__ == '__main__':
     opt = parser.parse_args()
 
     net_gen = ssd_gen()
-    ssd_net = ssd_gen.gen_net_model(opt.weights)
+    ssd_net = net_gen.gen_net_model(opt.weights)
 
-    ssd_net.fuse()
+    # ssd_net.fuse()
     imgsz = (300, 300)
     img = torch.zeros((1, 3) + imgsz)  # (1, 3, 416, 416)
     f = opt.weights.replace(opt.weights.split('.')[-1], 'onnx')  # *.onnx filename
