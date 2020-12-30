@@ -4,7 +4,8 @@
 import os, time, sys, pickle
 import argparse
 from net_gen_base import net_gen_base
-from ..models import *
+sys.path.append("..")
+from models import *
 import torch
 import onnx
 
@@ -13,7 +14,7 @@ class yolov3_gen(net_gen_base):
         self.cfg = cfg
         self.imgsz=(width, height)
 
-    def gen_net_model(pt_weight_file):
+    def gen_net_model(self, pt_weight_file):
         net = Darknet(self.cfg, self.imgsz)
         net.load_state_dict(torch.load(pt_weight_file)['model'])
         net.eval()

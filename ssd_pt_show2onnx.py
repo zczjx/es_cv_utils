@@ -13,7 +13,7 @@ class ssd_gen(net_gen_base):
         self.imgsz = width
         self.num_classes = num_classes
 
-    def gen_net_model(pt_weight_file):
+    def gen_net_model(self, pt_weight_file):
         net = build_ssd('test', self.imgsz, self.num_classes)            # initialize SSD
         net.load_state_dict(torch.load(pt_weight_file))
         net.eval()
