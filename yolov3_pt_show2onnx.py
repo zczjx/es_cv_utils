@@ -8,6 +8,7 @@ sys.path.append("..")
 from models import *
 import torch
 import onnx
+from torch.utils.tensorboard import SummaryWriter
 
 class yolov3_gen(net_gen_base):
     def __init__(self, cfg=None, width=416, height=461, num_classes=80):
@@ -29,9 +30,15 @@ if __name__ == '__main__':
     net_gen = yolov3_gen(opt.cfg)
     yolov3_net = net_gen.gen_net_model(opt.weights)
 
+    writer = SummaryWriter('runs/yolov3-tiny')
     yolov3_net.fuse()
+
     imgsz = (416, 416)
     img = torch.zeros((1, 3) + imgsz)  # (1, 3, 416, 416)
+    grid = torchvision.utils.make_grid(img)
+    writer.add_image('images', grid, 0)
+    writer.add_graph(yolov3_net, img)
+    writer.close()
     f = opt.weights.replace(opt.weights.split('.')[-1], 'onnx')  # *.onnx filename
     torch.onnx.export(yolov3_net, img, f, verbose=False, opset_version=11,
                     input_names=['images'], output_names=['classes_conf', 'bbox'])
