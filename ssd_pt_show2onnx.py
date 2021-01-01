@@ -8,6 +8,9 @@ sys.path.append("..")
 from ssd import build_ssd
 import torch
 import onnx
+import torch
+import torchvision
+from torch.utils.tensorboard import SummaryWriter
 
 class ssd_gen(net_gen_base):
     def __init__(self, cfg=None, width=300, height=300, num_classes=21):
@@ -27,10 +30,15 @@ if __name__ == '__main__':
 
     net_gen = ssd_gen()
     ssd_net = net_gen.gen_net_model(opt.weights)
+    writer = SummaryWriter('runs/ssd')
 
     # ssd_net.fuse()
     imgsz = (300, 300)
     img = torch.zeros((1, 3) + imgsz)  # (1, 3, 416, 416)
+    grid = torchvision.utils.make_grid(img)
+    writer.add_image('images', grid, 0)
+    writer.add_graph(ssd_net, img)
+    writer.close()
     f = opt.weights.replace(opt.weights.split('.')[-1], 'onnx')  # *.onnx filename
     torch.onnx.export(ssd_net, img, f, verbose=False, opset_version=11,
                     input_names=['images'], output_names=['detections'])
